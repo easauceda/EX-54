@@ -231,39 +231,29 @@ def draw_trees(surface):
     return tree_list
 
 
-def pause(surface):
-    font = pygame.font.SysFont('Calibri', 14, True, False)
-    font_text = font.render('Paused', True, constants.WHITE)
-    surface.blit(font_text, (constants.window_w / 2, constants.window_h / 2))
-    pygame.display.update()
-    paused = True
-    while paused:
-        for event in pygame.event.get():
-            pressed = pygame.key.get_pressed()
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-            elif pressed[K_ESCAPE]:
-                paused = False
-
-
 def menu(surface, score):
     font_score = pygame.font.SysFont('Helvetica', 32, True, False)
     font_title = pygame.font.SysFont('Helvetica', 64, True, False)
 
     txt_title = 'EX-54: Dead of Night'
-    txt_score = 'Score ' + score
+    txt_score = 'Score: ' + score
+    text_unpause = '[SPACEBAR] to unpause'
 
     size_title = font_title.size(txt_title)
     size_score = font_score.size(score)
+    size_unpause = font_score.size(text_unpause)
 
     txt_title_pos = (constants.window_w / 2 - (size_title[0] / 2), constants.window_h / 2 - (size_title[1] / 2))
     txt_score_pos = (constants.window_w / 2 - (size_score[0] / 2), constants.window_h / 2 - (size_score[1] / 2) + 70)
+    txt_unpause_pos = (constants.window_w / 2 - (size_unpause[0] / 2),
+                       constants.window_h / 2 - (size_unpause[1] / 2) + 130)
 
     rndr_title = font_title.render(txt_title, True, constants.WHITE)
     rndr_score = font_score.render(txt_score, True, constants.WHITE)
+    rndr_unpause = font_score.render(text_unpause, True, constants.WHITE)
 
     surface.blit(rndr_title, txt_title_pos)
+    surface.blit(rndr_unpause, txt_unpause_pos)
     surface.blit(rndr_score, txt_score_pos)
 
     pygame.display.update()
