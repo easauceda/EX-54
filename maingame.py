@@ -16,7 +16,7 @@ from classes.enemy import Enemy
 # TODO: Rewrite Menu Interface to start game
 
 class MainGame:
-    def __init__(self, level):
+    def __init__(self, level, difficulty):
         pygame.mixer.pre_init()
         pygame.init()
         pygame.display.set_caption("EX-54: Dead of Night")
@@ -25,12 +25,16 @@ class MainGame:
         constants.window_h = info.current_h - 200
         constants.load_sounds()
         constants.load_images()
+        if str(difficulty) != 'Difficulty':
+            constants.selected_difficulty = constants.difficulty[str(difficulty)]
+        else:
+            constants.selected_difficulty = constants.difficulty['medium']
         if level == 'mars':
             constants.GROUND = (255, 255, 102)
             constants.SKY = (128, 0, 0)
             constants.tree = pygame.image.load('images/rock.png')
         if level == 'ocean':
-            constants.GROUND = (255, 255, 102)
+            constants.GROUND = (0, 0, 50)
             constants.SKY = (0, 0, 50)
             constants.tree = pygame.image.load('images/fish.png')
         run_game()
@@ -49,17 +53,16 @@ def run_game():
     # Set variables
     enemy_munitions = []
     enemy_hits = []
-    difficulty = constants.difficulty['easy']
+    difficulty = constants.selected_difficulty
     distance = 0
     font = pygame.font.SysFont('Calibri', 20, True, False)
     distance_text = font.render("Distance", True, constants.WHITE)
-
     while True:
         # TODO: What the heck does weapon_cnt do??
         weapon_cnt = 0
         if distance > constants.goal:
             ending(surface, main_bg, main_ship, cannon, explosion_img, fps_clock)
-            menu(surface)
+            menu(surface, str(score))
             main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
             cannon.reset()
             enemy_munitions = []
@@ -81,12 +84,12 @@ def run_game():
             elif pressed[K_d] or pressed[K_RIGHT]:
                 vx += 5
             elif pressed[K_SPACE]:
-                menu(surface)
+                menu(surface, str(score))
 
 # Generate randomized missiles
 
         if random.randint(0, difficulty) == 1:
-            if not len(enemy_munitions) > 9:
+            if not len(enemy_munitions) > 19:
                 enemy_boom = Weapon(constants.window_w, random_loc(constants.window_h), constants.enemy_missile_img,
                                     'enemy')
                 enemy_munitions.append(enemy_boom)
@@ -104,7 +107,7 @@ def run_game():
                         main_ship.health -= 10
                 if main_ship.health <= 0:
                     main_ship.explode(explosion_img)
-                    menu(surface)
+                    menu(surface, str(score))
 # TODO: Write reset function
 
                     main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
@@ -129,12 +132,12 @@ def run_game():
         text = font.render("Health: " + str(main_ship.health) + "/ 100", True, constants.WHITE)
         surface.blit(text, [200, 10])
         surface.blit(distance_text, (10, 10))
-        draw_distance(surface, distance, goal)
+        draw_distance(surface, distance, constants.goal)
 
-# Update Screen and increase the distance the player has traveled
-
+# Update Screen and increase the distanc/score
         pygame.display.update()
         fps_clock.tick(constants.fps)
+        score = main_ship.health * distance
         distance += 1
 
 
@@ -244,28 +247,25 @@ def pause(surface):
                 paused = False
 
 
-def menu(surface):
-    font_menu = pygame.font.SysFont('Helvetica', 32, True, False)
+def menu(surface, score):
+    font_score = pygame.font.SysFont('Helvetica', 32, True, False)
     font_title = pygame.font.SysFont('Helvetica', 64, True, False)
 
     txt_title = 'EX-54: Dead of Night'
-    txt_play = 'PLAY'
-    txt_exit = 'EXIT'
+    txt_score = 'Score ' + score
 
     size_title = font_title.size(txt_title)
-    size_play = font_menu.size(txt_play)
+    size_score = font_score.size(score)
 
-    txt_play_pos = (constants.window_w - size_play[0] - 10, constants.window_h - 40)
-    txt_exit_pos = (10, txt_play_pos[1])
     txt_title_pos = (constants.window_w / 2 - (size_title[0] / 2), constants.window_h / 2 - (size_title[1] / 2))
+    txt_score_pos = (constants.window_w / 2 - (size_score[0] / 2), constants.window_h / 2 - (size_score[1] / 2) + 70)
 
     rndr_title = font_title.render(txt_title, True, constants.WHITE)
-    rndr_play = font_menu.render(txt_play, True, constants.WHITE)
-    rndr_exit = font_menu.render(txt_exit, True, constants.WHITE)
+    rndr_score = font_score.render(txt_score, True, constants.WHITE)
 
-    surface.blit(rndr_play, txt_play_pos)
-    surface.blit(rndr_exit, txt_exit_pos)
     surface.blit(rndr_title, txt_title_pos)
+    surface.blit(rndr_score, txt_score_pos)
+
     pygame.display.update()
     pygame.mixer.music.pause()
     paused = True
@@ -312,6 +312,3 @@ def ending(surface, main_bg, main_ship, cannon, explosion_img, fps_clock):
             main_ship.move(surface, 0, 5)
         fps_clock.tick(constants.fps)
         pygame.display.update()
-
-
-MainGame('ocean')

@@ -1,6 +1,5 @@
 __author__ = 'Erick'
 import pygame
-from classes.spritesheet import SpriteSheet
 
 WHITE = pygame.Color(255, 255, 255)
 GROUND = pygame.Color(2, 74, 0)
@@ -11,13 +10,14 @@ missile_ammo = 50
 bomb_ammo = 50
 window_h = 800
 window_w = 800
-fps = 60
+fps = 120
 bomb_img = pygame.image
 missile_img = pygame.image
 enemy_missile_img = pygame.image
-difficulty = {'easy': 70, 'medium': 40, 'hard': 20, 'death': 5}
+difficulty = {'easy': 50, 'medium': 20, 'hard': 10, 'death': 2}
 tree = pygame.image
 goal = 3000
+selected_difficulty = {}
 
 
 def load_sounds():
