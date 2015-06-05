@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/EX-54 Game.iml" filepath="$PROJECT_DIR$/.idea/EX-54 Game.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../collision_detection/.idea/collision_detection.iml" filepath="$PROJECT_DIR$/../collision_detection/.idea/collision_detection.iml" />
+    </modules>
+  </component>
+</project>
