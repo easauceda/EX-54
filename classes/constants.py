@@ -1,6 +1,10 @@
 __author__ = 'Erick'
 import pygame
 
+"""
+"""
+
+
 WHITE = pygame.Color(255, 255, 255)
 GROUND = pygame.Color(2, 74, 0)
 SKY = pygame.Color(30, 0, 50)

@@ -7,6 +7,13 @@ class SpaceShip(pygame.sprite.Sprite):
     Class Spaceship represents the spaceship controlled by the player. Consists of the image and coordinates.
     """
     def __init__(self, img, x, y):
+        """
+        Spaceship constructor.
+        :param img: Spaceship image.
+        :param x: Spaceship x position.
+        :param y: Spaceship y position.
+        :return: none
+        """
         self.image = img
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -17,6 +24,10 @@ class SpaceShip(pygame.sprite.Sprite):
         self.health = 100
 
     def get_x(self):
+        """
+        Getter for the
+        :return:
+        """
         return self.rect.x
 
     def get_y(self):

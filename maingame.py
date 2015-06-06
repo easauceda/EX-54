@@ -13,10 +13,14 @@ from classes.spritesheet import SpriteSheet
 from classes import constants
 from classes.enemy import Enemy
 
-# TODO: Rewrite Menu Interface to start game
-
 class MainGame:
     def __init__(self, level, difficulty):
+        """ Initializes key parts of main game
+        Starts pygame, sets the window size, and selects the difficulty and level as selected by the user.
+
+        :param level: User selected level. Earth, Mars, or the Ocean. Defaults to Earth.
+        :param difficulty: User selected difficulty. Easy, Medium, Hard, or Death. Defaults to Medium.
+        """
         pygame.mixer.pre_init()
         pygame.init()
         pygame.display.set_caption("EX-54: Dead of Night")
@@ -40,6 +44,9 @@ class MainGame:
         run_game()
 
 def run_game():
+    """ Main game loop
+        Main game loop of EX-54. Draws the background, main ship, checks collisions, etc.
+        """
     fps_clock = pygame.time.Clock()
     surface = pygame.display.set_mode((constants.window_w, constants.window_h))
     main_bg = draw_background(surface)
@@ -154,6 +161,13 @@ def draw_background(surface):
 
 
 def draw_distance(surface, distance, goal):
+    """
+    Draws the progress that the player has made so far, shown by a progress bar in the upper right hand corner
+    :param surface: Pygame display object
+    :param distance: Current user distance
+    :param goal: user goal
+    :return:
+    """
     progress = 100 * (distance / goal)
     pygame.draw.rect(surface, (0, 0, 0, 0), (85, 14, 100, 10))
     pygame.draw.rect(surface, constants.WHITE, (86, 14, progress, 10))
@@ -232,6 +246,12 @@ def draw_trees(surface):
 
 
 def menu(surface, score):
+    """
+    Pauses the game and draws the score, title card and instructions on how to unpause the game.
+    :param surface: Pygame display object.
+    :param score: Current user score. Calculated by multiplying user health and distance.
+    :return:
+    """
     font_score = pygame.font.SysFont('Helvetica', 32, True, False)
     font_title = pygame.font.SysFont('Helvetica', 64, True, False)
 
@@ -271,6 +291,16 @@ def menu(surface, score):
 
 
 def ending(surface, main_bg, main_ship, cannon, explosion_img, fps_clock):
+    """
+    Play the ending of the game. Called once the player's distance exceeds the goal distance.
+    :param surface: Pygame display object
+    :param main_bg: Main background, consists of the 'trees' and the drawn background.
+    :param main_ship: User ship.
+    :param cannon: Enemy.
+    :param explosion_img: Used to animate explosion of dropped bomb.
+    :param fps_clock: Used to normalize fps.
+    :return:
+    """
     end_running = True
     bombs_away = False
     cannon_moving = True

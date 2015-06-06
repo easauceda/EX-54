@@ -9,11 +9,25 @@ class Background:
     """
 
     def __init__(self, stars, trees):
+        """
+        Background constructor.
+        :param stars: A list of star objects
+        :param trees: A list of 'tree' objects
+        :return: none
+        """
         self.__stars = stars
         self.__trees = trees
 
     def get_stars(self):
+        """
+        Getter function for list of stars
+        :return: stars
+        """
         return self.__stars
 
     def get_trees(self):
+        """
+        Getter function for list of trees
+        :return: trees
+        """
         return self.__trees

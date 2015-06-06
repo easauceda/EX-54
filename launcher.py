@@ -1,3 +1,8 @@
+"""
+A game launcher for EX-54. Written using Tkinter, this menu will display two drop down lists, difficulty and level.
+Level is used to select the background and sprites for the game, while difficulty will mandate the intensity of
+missile rounds.
+"""
 from tkinter import *
 import maingame
 
@@ -31,6 +36,12 @@ start_game_button.configure(bg='#024A00', borderwidth=5, fg='#ffffff')
 start_game_button.pack()
 
 def start_game(selected_level, selected_difficulty):
+    """
+    Creates a MainGame instance with the selected options.
+    :param selected_level: Selected level from the levels OptionMenu
+    :param selected_difficulty: Selected difficulty from the difficulty OptionMenu
+    :return: None
+    """
     maingame.MainGame(selected_level, selected_difficulty)
 
 mainloop()
