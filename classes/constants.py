@@ -16,7 +16,7 @@ missile_img = pygame.image
 enemy_missile_img = pygame.image
 difficulty = {'easy': 50, 'medium': 20, 'hard': 10, 'death': 2}
 bg_sprite = pygame.image
-goal = 300
+goal = 3000
 selected_difficulty = {}
 
 
