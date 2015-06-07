@@ -6,7 +6,7 @@ class SpaceShip(pygame.sprite.Sprite):
     """
     Class Spaceship represents the spaceship controlled by the player. Consists of the image and coordinates.
     """
-    def __init__(self, img, x, y):
+    def __init__(self, img, x, y, health=100):
         """
         Spaceship constructor.
         :param img: Spaceship image.
@@ -21,7 +21,7 @@ class SpaceShip(pygame.sprite.Sprite):
         self.explode_pos_x = 0
         self.explode_pos_y = 0
         self.exploded = False
-        self.health = 100
+        self.health = health
 
     def get_x(self):
         """

@@ -38,6 +38,7 @@ class MainGame:
         self.current_level = ''
         self.surface = pygame.display.set_mode((constants.window_w, constants.window_h))
         self.main_bg = draw_background(self.surface)
+        self.score = 10
         self.run_game()
 
     def run_game(self):
@@ -59,12 +60,14 @@ class MainGame:
         distance = 0
         font = pygame.font.SysFont('Calibri', 20, True, False)
         distance_text = font.render("Distance", True, constants.WHITE)
+
         while True:
             weapon_cnt = 0
             if distance > constants.goal:
                 self.ending(main_ship, cannon, explosion_img, fps_clock)
-                menu(self.surface, str(score))
-                main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
+                menu(self.surface, str(self.score))
+                health = main_ship.health
+                main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100, health)
                 cannon.reset()
                 enemy_munitions = []
                 distance = 0
@@ -85,7 +88,7 @@ class MainGame:
                 elif pressed[K_d] or pressed[K_RIGHT]:
                     vx += 5
                 elif pressed[K_SPACE]:
-                    menu(self.surface, str(score))
+                    menu(self.surface, str(self.score))
 
     # Generate randomized missiles
 
@@ -108,10 +111,11 @@ class MainGame:
                             main_ship.health -= 10
                     if main_ship.health <= 0:
                         main_ship.explode(explosion_img)
-                        menu(self.surface, str(score))
+                        menu(self.surface, str(self.score))
                         main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
                         enemy_munitions = []
                         distance = 0
+                        self.score = 0
 
     # Redraw all relevant elements
 
@@ -136,7 +140,7 @@ class MainGame:
     # Update Screen and increase the distance / score
             pygame.display.update()
             fps_clock.tick(constants.fps)
-            score = main_ship.health * distance
+            self.score += 10
             distance += 1
 
     def ending(self, main_ship, cannon, explosion_img, fps_clock):
@@ -317,7 +321,7 @@ def menu(surface, score):
 
     txt_title = 'EX-54: Dead of Night'
     txt_score = 'Score: ' + score
-    text_unpause = '[SPACEBAR] to unpause'
+    text_unpause = '[SPACEBAR] to continue'
 
     size_title = font_title.size(txt_title)
     size_score = font_score.size(score)
