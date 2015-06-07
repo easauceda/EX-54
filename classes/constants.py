@@ -1,10 +1,6 @@
 __author__ = 'Erick'
 import pygame
 
-"""
-"""
-
-
 WHITE = pygame.Color(255, 255, 255)
 GROUND = pygame.Color(2, 74, 0)
 SKY = pygame.Color(30, 0, 50)
@@ -20,11 +16,16 @@ missile_img = pygame.image
 enemy_missile_img = pygame.image
 difficulty = {'easy': 50, 'medium': 20, 'hard': 10, 'death': 2}
 tree = pygame.image
-goal = 3000
+goal = 300
 selected_difficulty = {}
 
 
 def load_sounds():
+    """
+    Since pygame must be initialized before any sounds can be loaded, this function sets the laser and impact sounds
+    for the game.
+    :return:
+    """
     global laser
     global impact
     laser = pygame.mixer.Sound('sounds/rocket.ogg')
@@ -32,6 +33,11 @@ def load_sounds():
 
 
 def load_images():
+    """
+    Since pygame must be initialized before any sounds can be loaded, this function loads and sets images
+    for the game.
+    :return:
+    """
     global bomb_img
     global missile_img
     global enemy_missile_img

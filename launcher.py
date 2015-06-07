@@ -8,6 +8,7 @@ import maingame
 
 launcher = Tk()
 launcher.configure(bg='#1E0032')
+launcher.title('EX-54')
 
 title = Label(launcher, text='EX-54', font=('Helvetica', 32), bg='#1E0032', fg='#ffffff')
 title.pack()

@@ -3,8 +3,19 @@ import pygame
 
 
 class Weapon(pygame.sprite.Sprite):
+    """
+    Weapon class. Used to control all missiles on screen, detect collisions, and animate explosion upon collision.
+    """
 
     def __init__(self, x, y, img, weapon_type):
+        """
+        Constructor.
+        :param x: x position for weapon
+        :param y: y position for weapon
+        :param img: weapon image
+        :param weapon_type: generally a missile, but during ending will be used to bomb the enemy.
+        :return:
+        """
         self.image = img
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -15,6 +26,12 @@ class Weapon(pygame.sprite.Sprite):
         self.weapon_type = weapon_type
 
     def draw(self, surface, explosion):
+        """
+        Draw the weapon on screen.
+        :param surface: Pygame Display object
+        :param explosion: explosion animation
+        :return:
+        """
         if not self.weapon_type == 'enemy':
             b_collide = self.rect.y + self.image.get_height() > surface.get_height()
             r_collide = self.rect.x + self.image.get_width() > surface.get_width()
@@ -32,18 +49,24 @@ class Weapon(pygame.sprite.Sprite):
         surface.blit(self.image, (self.rect.x, self.rect.y))
 
     def fall(self):
+        """
+        Moves the weapon object across the screen by updating the position of the weapon.
+        :return:
+        """
         if self.weapon_type == 'bomb':
             self.rect.y += 5
             self.rect.x += -1
-        if self.weapon_type == 'missile':
-            self.rect.x += 10
-            self.rect.y += 0
         if self.weapon_type == 'enemy':
             self.rect.x -= 10
             self.rect.y += 0
 
     def explode(self, explosion):
-        # pygame.mixer.Sound.play(impact)
+        """
+        Explosion for weapon object. Triggered upon collision. Flips the exploded boolean to flag the weapon object for
+        cleanup in the main game loop.
+        :param explosion:
+        :return:
+        """
         if self.weapon_type == 'bomb':
             self.rect.x += -10
             self.explode_pos_x += 128
@@ -63,6 +86,10 @@ class Weapon(pygame.sprite.Sprite):
             self.exploded = True
 
     def is_exploded(self):
+        """
+        The main game loop checks this boolean in order to determine whether it is time to clean up the weapon object.
+        :return:
+        """
         return self.exploded
 
 

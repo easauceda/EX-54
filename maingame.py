@@ -13,6 +13,7 @@ from classes.spritesheet import SpriteSheet
 from classes import constants
 from classes.enemy import Enemy
 
+
 class MainGame:
     def __init__(self, level, difficulty):
         """ Initializes key parts of main game
@@ -21,6 +22,7 @@ class MainGame:
         :param level: User selected level. Earth, Mars, or the Ocean. Defaults to Earth.
         :param difficulty: User selected difficulty. Easy, Medium, Hard, or Death. Defaults to Medium.
         """
+        self.current_lvl = level
         pygame.mixer.pre_init()
         pygame.init()
         pygame.display.set_caption("EX-54: Dead of Night")
@@ -33,15 +35,27 @@ class MainGame:
             constants.selected_difficulty = constants.difficulty[str(difficulty)]
         else:
             constants.selected_difficulty = constants.difficulty['medium']
-        if level == 'mars':
-            constants.GROUND = (255, 255, 102)
-            constants.SKY = (128, 0, 0)
-            constants.tree = pygame.image.load('images/rock.png')
-        if level == 'ocean':
-            constants.GROUND = (0, 0, 50)
-            constants.SKY = (0, 0, 50)
-            constants.tree = pygame.image.load('images/fish.png')
+        change_level(level)
         run_game()
+
+
+def change_level(level):
+    if level == 'mars':
+        constants.GROUND = (255, 255, 102)
+        constants.SKY = (128, 0, 0)
+        constants.tree = pygame.image.load('images/rock.png')
+        MainGame.current_lvl = 'mars'
+    if level == 'ocean':
+        constants.GROUND = (0, 0, 50)
+        constants.SKY = (0, 0, 50)
+        constants.tree = pygame.image.load('images/fish.png')
+        MainGame.current_lvl = 'ocean'
+    else:
+        constants.GROUND = pygame.Color(2, 74, 0)
+        constants.SKY = pygame.Color(30, 0, 50)
+        constants.tree = pygame.image.load('images/tree_alt.png')
+        MainGame.current_lvl = 'earth'
+
 
 def run_game():
     """ Main game loop
@@ -65,7 +79,6 @@ def run_game():
     font = pygame.font.SysFont('Calibri', 20, True, False)
     distance_text = font.render("Distance", True, constants.WHITE)
     while True:
-        # TODO: What the heck does weapon_cnt do??
         weapon_cnt = 0
         if distance > constants.goal:
             ending(surface, main_bg, main_ship, cannon, explosion_img, fps_clock)
@@ -115,8 +128,6 @@ def run_game():
                 if main_ship.health <= 0:
                     main_ship.explode(explosion_img)
                     menu(surface, str(score))
-# TODO: Write reset function
-
                     main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
                     enemy_munitions = []
                     distance = 0
@@ -141,7 +152,7 @@ def run_game():
         surface.blit(distance_text, (10, 10))
         draw_distance(surface, distance, constants.goal)
 
-# Update Screen and increase the distanc/score
+# Update Screen and increase the distance / score
         pygame.display.update()
         fps_clock.tick(constants.fps)
         score = main_ship.health * distance
@@ -272,6 +283,7 @@ def menu(surface, score):
     rndr_score = font_score.render(txt_score, True, constants.WHITE)
     rndr_unpause = font_score.render(text_unpause, True, constants.WHITE)
 
+    surface.fill((0, 0, 0))
     surface.blit(rndr_title, txt_title_pos)
     surface.blit(rndr_unpause, txt_unpause_pos)
     surface.blit(rndr_score, txt_score_pos)
