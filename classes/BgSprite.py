@@ -3,7 +3,7 @@ import pygame
 from classes import constants
 
 
-class Tree(pygame.sprite.Sprite):
+class BgSprite(pygame.sprite.Sprite):
     """
     Class Tree represents every tree in-game. Consists of the image object, an x position, and y position.
     """
@@ -17,7 +17,7 @@ class Tree(pygame.sprite.Sprite):
     def get_tree(self):
         return self.image
 
-    def draw_tree(self, surface):
+    def draw_bg_sprite(self, surface):
         surface.blit(self.image, (self.rect.x, self.rect.y))
 
     def move(self, surface):

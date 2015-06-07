@@ -31,3 +31,4 @@ class Background:
         :return: trees
         """
         return self.__trees
+

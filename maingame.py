@@ -7,7 +7,7 @@ from pygame.locals import *
 from classes.Star import Star
 from classes.Background import Background
 from classes.spaceship import SpaceShip
-from classes.Tree import Tree
+from classes.BgSprite import BgSprite
 from classes.Weapon import Weapon
 from classes.spritesheet import SpriteSheet
 from classes import constants
@@ -22,7 +22,6 @@ class MainGame:
         :param level: User selected level. Earth, Mars, or the Ocean. Defaults to Earth.
         :param difficulty: User selected difficulty. Easy, Medium, Hard, or Death. Defaults to Medium.
         """
-        self.current_lvl = level
         pygame.mixer.pre_init()
         pygame.init()
         pygame.display.set_caption("EX-54: Dead of Night")
@@ -36,127 +35,178 @@ class MainGame:
         else:
             constants.selected_difficulty = constants.difficulty['medium']
         change_level(level)
-        run_game()
+        self.current_level = ''
+        self.surface = pygame.display.set_mode((constants.window_w, constants.window_h))
+        self.main_bg = draw_background(self.surface)
+        self.run_game()
 
+    def run_game(self):
+        """ Main game loop
+            Main game loop of EX-54. Draws the background, main ship, checks collisions, etc.
+            """
+        fps_clock = pygame.time.Clock()
+        # Create player ship and enemy
+        main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
+        cannon = Enemy(pygame.image.load("images\cannon.gif"))
+        explosion_img = SpriteSheet('images\explosion.png')
+        # Start music
+        pygame.mixer.music.load('sounds\music.ogg')
+        pygame.mixer.music.play()
+        # Set variables
+        enemy_munitions = []
+        enemy_hits = []
+        difficulty = constants.selected_difficulty
+        distance = 0
+        font = pygame.font.SysFont('Calibri', 20, True, False)
+        distance_text = font.render("Distance", True, constants.WHITE)
+        while True:
+            weapon_cnt = 0
+            if distance > constants.goal:
+                self.ending(main_ship, cannon, explosion_img, fps_clock)
+                menu(self.surface, str(score))
+                main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
+                cannon.reset()
+                enemy_munitions = []
+                distance = 0
+
+            for event in pygame.event.get():
+                vy = 0
+                vx = 0
+                pressed = pygame.key.get_pressed()
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if pressed[K_w] or pressed[K_UP]:
+                    vy -= 5
+                elif pressed[K_s] or pressed[K_DOWN]:
+                    vy += 5
+                elif pressed[K_a] or pressed[K_LEFT]:
+                    vx -= 5
+                elif pressed[K_d] or pressed[K_RIGHT]:
+                    vx += 5
+                elif pressed[K_SPACE]:
+                    menu(self.surface, str(score))
+
+    # Generate randomized missiles
+
+            if random.randint(0, difficulty) == 1:
+                if not len(enemy_munitions) > 19:
+                    enemy_boom = Weapon(constants.window_w, random_loc(constants.window_h), constants.enemy_missile_img,
+                                        'enemy')
+                    enemy_munitions.append(enemy_boom)
+                    enemy_hits.append(enemy_boom)
+
+    # Check for hits and update health
+
+            if len(enemy_munitions) > 1:
+                ship_hit_list = pygame.sprite.spritecollide(main_ship, enemy_hits, False)
+                if len(ship_hit_list) > 0:
+                    for weapon in ship_hit_list:
+                        if not weapon.exploded:
+                            weapon.exploded = True
+                            weapon.explode(explosion_img)
+                            main_ship.health -= 10
+                    if main_ship.health <= 0:
+                        main_ship.explode(explosion_img)
+                        menu(self.surface, str(score))
+                        main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
+                        enemy_munitions = []
+                        distance = 0
+
+    # Redraw all relevant elements
+
+            main_ship.move(self.surface, vy, vx)
+            move_bg(self.main_bg, self.surface)
+
+            for weapon in enemy_munitions:
+                weapon.fall()
+                weapon.draw(self.surface, explosion_img)
+                if weapon.exploded:
+                    enemy_munitions.pop(weapon_cnt)
+                weapon_cnt += 1
+
+            main_ship.draw(self.surface)
+            cannon.draw(self.surface)
+
+            text = font.render("Health: " + str(main_ship.health) + "/ 100", True, constants.WHITE)
+            self.surface.blit(text, [200, 10])
+            self.surface.blit(distance_text, (10, 10))
+            draw_distance(self.surface, distance, constants.goal)
+
+    # Update Screen and increase the distance / score
+            pygame.display.update()
+            fps_clock.tick(constants.fps)
+            score = main_ship.health * distance
+            distance += 1
+
+    def ending(self, main_ship, cannon, explosion_img, fps_clock):
+        """
+        Play the ending of the game. Called once the player's distance exceeds the goal distance.
+        :param surface: Pygame display object
+        :param main_bg: Main background, consists of the 'trees' and the drawn background.
+        :param main_ship: User ship.
+        :param cannon: Enemy.
+        :param explosion_img: Used to animate explosion of dropped bomb.
+        :param fps_clock: Used to normalize fps.
+        :return:
+        """
+        end_running = True
+        bombs_away = False
+        cannon_moving = True
+        pos_x = constants.window_w
+        while end_running:
+            move_bg(self.main_bg, self.surface)
+            main_ship.draw(self.surface)
+            if not main_ship.get_x() >= constants.window_w / 2:
+                main_ship.move(self.surface, -5, 5)
+            else:
+                if not cannon_moving:
+                    if not bombs_away:
+                        bomb = Weapon(main_ship.get_x(), main_ship.get_y(), constants.bomb_img, 'bomb')
+                        bombs_away = True
+                    else:
+                        if not bomb.exploded:
+                            cannon.end_draw(self.surface, pos_x)
+                            pos_x -= 5
+                        bomb.draw(self.surface, explosion_img)
+                        bomb.fall()
+                else:
+                    cannon.end_draw(self.surface, pos_x)
+                    pos_x -= 5
+                    if cannon.get_x() < constants.window_w / 2 + 300:
+                        cannon_moving = False
+            if bombs_away and bomb.exploded:
+                if main_ship.get_x() >= constants.window_w - 150:
+                    end_running = False
+                main_ship.move(self.surface, 0, 5)
+            fps_clock.tick(constants.fps)
+            pygame.display.update()
+        if MainGame.current_level == 'mars':
+            change_level('earth')
+            self.main_bg = draw_background(self.surface)
+        elif MainGame.current_level == 'ocean':
+            change_level('mars')
+            self.main_bg = draw_background(self.surface)
+        else:
+            change_level('ocean')
+            self.main_bg = draw_background(self.surface)
 
 def change_level(level):
     if level == 'mars':
         constants.GROUND = (255, 255, 102)
         constants.SKY = (128, 0, 0)
-        constants.tree = pygame.image.load('images/rock.png')
-        MainGame.current_lvl = 'mars'
-    if level == 'ocean':
+        constants.bg_sprite = pygame.image.load('images/rock.png')
+        MainGame.current_level = 'mars'
+    elif level == 'ocean':
         constants.GROUND = (0, 0, 50)
         constants.SKY = (0, 0, 50)
-        constants.tree = pygame.image.load('images/fish.png')
-        MainGame.current_lvl = 'ocean'
+        constants.bg_sprite = pygame.image.load('images/fish.png')
+        MainGame.current_level = 'ocean'
     else:
         constants.GROUND = pygame.Color(2, 74, 0)
         constants.SKY = pygame.Color(30, 0, 50)
-        constants.tree = pygame.image.load('images/tree_alt.png')
-        MainGame.current_lvl = 'earth'
-
-
-def run_game():
-    """ Main game loop
-        Main game loop of EX-54. Draws the background, main ship, checks collisions, etc.
-        """
-    fps_clock = pygame.time.Clock()
-    surface = pygame.display.set_mode((constants.window_w, constants.window_h))
-    main_bg = draw_background(surface)
-    # Create player ship and enemy
-    main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
-    cannon = Enemy(pygame.image.load("images\cannon.gif"))
-    explosion_img = SpriteSheet('images\explosion.png')
-    # Start music
-    pygame.mixer.music.load('sounds\music.ogg')
-    pygame.mixer.music.play()
-    # Set variables
-    enemy_munitions = []
-    enemy_hits = []
-    difficulty = constants.selected_difficulty
-    distance = 0
-    font = pygame.font.SysFont('Calibri', 20, True, False)
-    distance_text = font.render("Distance", True, constants.WHITE)
-    while True:
-        weapon_cnt = 0
-        if distance > constants.goal:
-            ending(surface, main_bg, main_ship, cannon, explosion_img, fps_clock)
-            menu(surface, str(score))
-            main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
-            cannon.reset()
-            enemy_munitions = []
-            distance = 0
-
-        for event in pygame.event.get():
-            vy = 0
-            vx = 0
-            pressed = pygame.key.get_pressed()
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-            if pressed[K_w] or pressed[K_UP]:
-                vy -= 5
-            elif pressed[K_s] or pressed[K_DOWN]:
-                vy += 5
-            elif pressed[K_a] or pressed[K_LEFT]:
-                vx -= 5
-            elif pressed[K_d] or pressed[K_RIGHT]:
-                vx += 5
-            elif pressed[K_SPACE]:
-                menu(surface, str(score))
-
-# Generate randomized missiles
-
-        if random.randint(0, difficulty) == 1:
-            if not len(enemy_munitions) > 19:
-                enemy_boom = Weapon(constants.window_w, random_loc(constants.window_h), constants.enemy_missile_img,
-                                    'enemy')
-                enemy_munitions.append(enemy_boom)
-                enemy_hits.append(enemy_boom)
-
-# Check for hits and update health
-
-        if len(enemy_munitions) > 1:
-            ship_hit_list = pygame.sprite.spritecollide(main_ship, enemy_hits, False)
-            if len(ship_hit_list) > 0:
-                for weapon in ship_hit_list:
-                    if not weapon.exploded:
-                        weapon.exploded = True
-                        weapon.explode(explosion_img)
-                        main_ship.health -= 10
-                if main_ship.health <= 0:
-                    main_ship.explode(explosion_img)
-                    menu(surface, str(score))
-                    main_ship = SpaceShip(pygame.image.load("images\spaceship.png"), 100, 100)
-                    enemy_munitions = []
-                    distance = 0
-
-# Redraw all relevant elements
-
-        main_ship.move(surface, vy, vx)
-        move_bg(main_bg, surface)
-
-        for weapon in enemy_munitions:
-            weapon.fall()
-            weapon.draw(surface, explosion_img)
-            if weapon.exploded:
-                enemy_munitions.pop(weapon_cnt)
-            weapon_cnt += 1
-
-        main_ship.draw(surface)
-        cannon.draw(surface)
-
-        text = font.render("Health: " + str(main_ship.health) + "/ 100", True, constants.WHITE)
-        surface.blit(text, [200, 10])
-        surface.blit(distance_text, (10, 10))
-        draw_distance(surface, distance, constants.goal)
-
-# Update Screen and increase the distance / score
-        pygame.display.update()
-        fps_clock.tick(constants.fps)
-        score = main_ship.health * distance
-        distance += 1
+        constants.bg_sprite = pygame.image.load('images/tree_alt.png')
+        MainGame.current_level = 'earth'
 
 
 def draw_background(surface):
@@ -167,8 +217,8 @@ def draw_background(surface):
     """
     stars = draw_stars(surface)
     draw_ground(surface)
-    trees = draw_trees(surface)
-    return Background(stars, trees)
+    bg_sprites = draw_bg_sprites(surface)
+    return Background(stars, bg_sprites)
 
 
 def draw_distance(surface, distance, goal):
@@ -239,21 +289,20 @@ def move_bg(main_bg, surface):
     surface.blit(text, [constants.window_w - 210, 10])
 
 
-def draw_trees(surface):
+def draw_bg_sprites(surface):
     """
     Creates multiple tree objects using the provided image and displays them on the screen.
     :param surface: Pygame display object
     :return:
-        tree_list: a list of all the trees created by the function, to be set as a property of Background.
+        bg_sprite_list: a list of all the trees created by the function, to be set as a property of Background.
     """
     height_buffer = constants.window_h / 2
-    tree_list = []
+    bg_sprite_list = []
     for i in range(1, 10):
-        t = Tree(constants.tree, random_loc(constants.window_w),
-                 random_loc(constants.window_h, height_buffer))
-        tree_list.append(t)
-        t.draw_tree(surface)
-    return tree_list
+        t = BgSprite(constants.bg_sprite, random_loc(constants.window_w), random_loc(constants.window_h, height_buffer))
+        bg_sprite_list.append(t)
+        t.draw_bg_sprite(surface)
+    return bg_sprite_list
 
 
 def menu(surface, score):
@@ -302,45 +351,3 @@ def menu(surface, score):
                 pygame.mixer.music.unpause()
 
 
-def ending(surface, main_bg, main_ship, cannon, explosion_img, fps_clock):
-    """
-    Play the ending of the game. Called once the player's distance exceeds the goal distance.
-    :param surface: Pygame display object
-    :param main_bg: Main background, consists of the 'trees' and the drawn background.
-    :param main_ship: User ship.
-    :param cannon: Enemy.
-    :param explosion_img: Used to animate explosion of dropped bomb.
-    :param fps_clock: Used to normalize fps.
-    :return:
-    """
-    end_running = True
-    bombs_away = False
-    cannon_moving = True
-    pos_x = constants.window_w
-    while end_running:
-        move_bg(main_bg, surface)
-        main_ship.draw(surface)
-        if not main_ship.get_x() >= constants.window_w / 2:
-            main_ship.move(surface, -5, 5)
-        else:
-            if not cannon_moving:
-                if not bombs_away:
-                    bomb = Weapon(main_ship.get_x(), main_ship.get_y(), constants.bomb_img, 'bomb')
-                    bombs_away = True
-                else:
-                    if not bomb.exploded:
-                        cannon.end_draw(surface, pos_x)
-                        pos_x -= 5
-                    bomb.draw(surface, explosion_img)
-                    bomb.fall()
-            else:
-                cannon.end_draw(surface, pos_x)
-                pos_x -= 5
-                if cannon.get_x() < constants.window_w / 2 + 300:
-                    cannon_moving = False
-        if bombs_away and bomb.exploded:
-            if main_ship.get_x() >= constants.window_w - 150:
-                end_running = False
-            main_ship.move(surface, 0, 5)
-        fps_clock.tick(constants.fps)
-        pygame.display.update()

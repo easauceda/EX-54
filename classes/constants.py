@@ -15,7 +15,7 @@ bomb_img = pygame.image
 missile_img = pygame.image
 enemy_missile_img = pygame.image
 difficulty = {'easy': 50, 'medium': 20, 'hard': 10, 'death': 2}
-tree = pygame.image
+bg_sprite = pygame.image
 goal = 300
 selected_difficulty = {}
 
@@ -41,8 +41,8 @@ def load_images():
     global bomb_img
     global missile_img
     global enemy_missile_img
-    global tree
+    global bg_sprite
     bomb_img = pygame.image.load("images/boom.png")
     missile_img = pygame.image.load("images/bomb.gif")
     enemy_missile_img = pygame.image.load("images/enemy.gif")
-    tree = pygame.image.load("images/tree_alt.png")
+    bg_sprite = pygame.image.load("images/tree_alt.png")
