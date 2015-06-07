@@ -17,7 +17,7 @@ Ocean: Cruise deep under water and avoid missiles to succeed!
 
 Mars: Visit a strange alien planet! Oh look, your enemies made it here too!
 
-Difficulties
+Difficulty Level
 ------------------------------------------
 Easy: With a steady hand and a little patience, you will prevail.
 
